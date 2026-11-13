@@ -33,11 +33,18 @@ public class WarehouseImportService {
  private void normalizeWarehouse(List<List<String>> rows, int column, int cols) {
   for (List<String> row : rows) {
    String warehouse = row.get(column).trim();
-   if (!warehouse.equalsIgnoreCase("美东New Brunswick(NJ)") && !warehouse.equalsIgnoreCase("FLash海外仓"))
-    throw new ServiceException("第" + row.get(cols) + "行仓库无法识别：" + warehouse);
    if (row.get(0).isBlank()) throw new ServiceException("第" + row.get(cols) + "行 SKU 不能为空。");
-   row.set(column, "FLash海外仓");
+   row.set(column, normalizeFlashWarehouseName(warehouse, row.get(cols)));
   }
+ }
+ static String normalizeFlashWarehouseName(String warehouse, String sourceRow) {
+  String value = Objects.requireNonNullElse(warehouse, "").trim();
+  if (value.equalsIgnoreCase("美东New Brunswick(NJ)")
+      || value.equalsIgnoreCase("FLash海外仓")
+      || value.equalsIgnoreCase("1仓-91761仓(FLASH01)")) {
+   return "FLash海外仓";
+  }
+  throw new ServiceException("第" + sourceRow + "行仓库无法识别：" + value);
  }
  private String name(MultipartFile f) { return Objects.requireNonNullElse(f.getOriginalFilename(),"upload.xlsx").replaceAll("^.*[/\\\\]",""); }
  private List<List<String>> read(MultipartFile f,int cols,String first,String second) throws IOException {
