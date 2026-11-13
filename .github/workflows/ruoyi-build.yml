@@ -8,12 +8,14 @@ on:
       - "ci/**"
     paths:
       - "ruoyi-source/**"
+      - "ruoyi-backend/**"
       - ".github/workflows/ruoyi-build.yml"
   pull_request:
     branches:
       - main
     paths:
       - "ruoyi-source/**"
+      - "ruoyi-backend/**"
       - ".github/workflows/ruoyi-build.yml"
   workflow_dispatch:
 
@@ -109,6 +111,33 @@ jobs:
             echo "No JAR was built or published in this run."
           } >> "$GITHUB_STEP_SUMMARY"
           echo "::notice::Waiting for the complete RuoYi source under ruoyi-source/."
+
+      - name: Overlay current FLash warehouse import source and tests
+        if: steps.source.outputs.source_dir != ''
+        shell: bash
+        env:
+          SOURCE_DIR: ${{ steps.source.outputs.source_dir }}
+        run: |
+          set -euo pipefail
+          main_source="ruoyi-backend/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/WarehouseImportService.java"
+          test_source="ruoyi-backend/ruoyi-system/src/test/java/com/ruoyi/system/service/impl/WarehouseImportServiceTest.java"
+          test_target="$SOURCE_DIR/ruoyi-system/src/test/java/com/ruoyi/system/service/impl/WarehouseImportServiceTest.java"
+          main_target="$SOURCE_DIR/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/WarehouseImportService.java"
+
+          test -s "$main_source"
+          test -s "$test_source"
+          test -s "$main_target"
+
+          mkdir -p "$(dirname "$test_target")"
+          cp "$main_source" "$main_target"
+          cp "$test_source" "$test_target"
+
+          echo "## FLash source overlay" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Updated WarehouseImportService.java from the reviewed branch patch." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Added WarehouseImportServiceTest.java to the Maven test source tree." >> "$GITHUB_STEP_SUMMARY"
+          grep -q '1仓-91761仓(FLASH01)' "$main_target"
+          grep -q 'normalizeFlashWarehouseName' "$test_target"
+          echo "FLash alias source and regression test are present in the actual Maven source tree."
 
       - name: Set up Temurin JDK 17
         if: steps.source.outputs.source_dir != ''
