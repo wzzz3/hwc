@@ -1,0 +1,3 @@
+/* R16: visible anchor controls for the two independent analysis sources. */
+.iw-analysis-jumps a{display:inline-flex;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:7px 11px;color:var(--blue);font:500 12px var(--font);text-decoration:none;cursor:pointer}.iw-analysis-jumps a:hover{background:var(--blue-soft)}.iw-analysis-jumps a:focus-visible{outline:2px solid var(--blue);outline-offset:2px}.iw-analysis-section-head>a.iw-text-button{color:var(--blue);text-decoration:none;white-space:nowrap}
+@media(max-width:620px){.iw-analysis-jumps a{flex:1;justify-content:center}}

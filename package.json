@@ -1,0 +1,1 @@
+{"name":"analytics-standalone","private":true,"version":"0.1.0","type":"module","engines":{"node":">=22.13"},"scripts":{"start":"node server/index.js"}}

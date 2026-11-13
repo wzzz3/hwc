@@ -1,0 +1,433 @@
+/* NewUI · a quiet light-blue workspace. Presentation only; data and actions stay in their existing modules. */
+@font-face{font-family:NewUIIcons;src:url('./newui-assets/element-icons.woff') format('woff');font-weight:normal;font-style:normal;font-display:block}
+.newui-icon{font-family:NewUIIcons!important;font-weight:normal;font-style:normal;line-height:1;speak:none;-webkit-font-smoothing:antialiased}
+
+html:not([data-theme="dark"]){
+  --ink:#1b2d43;--ink-2:#526279;--muted:#66788e;--metric-ink:#203f65;
+  --navy:#173f65;--navy-2:#245681;
+  --blue:#246bd1;--blue-2:#77b2ef;--blue-soft:#e9f2ff;
+  --teal:#178aab;--green:#248358;--green-soft:#eaf7ee;
+  --orange:#d17b28;--orange-soft:#fff5e9;--red:#c44f59;--red-soft:#fff0f1;
+  --amber:#a86816;--amber-soft:#fff7e9;
+  --canvas:#f3f8ff;--surface:#fff;--surface-2:#f8faff;
+  --line:#dce5f0;--line-2:#edf2f8;
+  --shadow:0 5px 18px rgba(27,64,108,.065);
+  --shadow-sm:0 2px 5px rgba(27,64,108,.025);
+  --shadow-strong:0 16px 42px rgba(30,55,80,.14);
+  --radius:11px;
+}
+html[data-theme="dark"]{
+  --ink:#e6eef6;--ink-2:#bdcede;--muted:#96adbf;--metric-ink:#c2def4;
+  --navy:#253d52;--navy-2:#304f68;
+  --blue:#8abbe5;--blue-2:#b2d5f2;--blue-soft:#213b51;
+  --teal:#8abbe5;--green:#7bc39b;--green-soft:#20362a;
+  --orange:#d4ac79;--orange-soft:#372e22;--red:#e58a8c;--red-soft:#382426;
+  --canvas:#16232e;--surface:#1e303e;--surface-2:#243848;
+  --line:#365064;--line-2:#2c4356;--radius:11px;
+}
+html[data-newui]{--font:"NewUI Numbers","NewUI Sans","Microsoft YaHei UI","PingFang SC",sans-serif;--data:var(--font)}
+body{font-size:14px;line-height:1.6;letter-spacing:0}
+button,input,select,textarea{font-family:var(--font)}
+button{transition:background .16s,color .16s,border-color .16s,box-shadow .16s}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+
+/* Familiar navigation, quieter framing. */
+html[data-newui] .sidebar{width:208px;background:var(--surface-2);border-right:1px solid var(--line);color:var(--ink)}
+html[data-newui] .workspace{width:calc(100% - 208px);margin-left:208px}
+html[data-newui] .brand{height:94px;padding:0 23px;gap:11px;border-bottom:1px solid var(--line-2)}
+html[data-newui] .brand-mark{width:36px;height:36px;padding:8px;border-radius:10px;background:var(--blue);border:0;box-shadow:none}
+html[data-newui] .brand-mark i,html[data-newui] .brand-mark i:nth-child(3){background:#fff}
+html[data-newui] .brand strong{font-size:17px;letter-spacing:1px;color:var(--ink)}
+html[data-newui] .brand small{font-size:11px;letter-spacing:0;margin-top:3px;color:var(--muted)}
+html[data-newui] .main-nav{padding:22px 14px}
+html[data-newui] .nav-group{margin-bottom:21px}
+html[data-newui] .nav-group>span{font-size:11px;font-weight:500;letter-spacing:1px;color:var(--muted);padding:0 13px 9px}
+html[data-newui] .nav-item{height:43px;padding:0 12px;margin:3px 0;border-radius:7px;color:var(--ink-2);gap:12px}
+html[data-newui] .nav-item:hover{color:var(--ink);background:var(--line-2)}
+html[data-newui] .nav-item.active{color:var(--blue);background:var(--blue-soft)}
+html[data-newui] .nav-item.active:before{display:block;left:0;top:11px;bottom:11px;width:3px;background:var(--blue);border-radius:0 3px 3px 0}
+html[data-newui] .nav-item b{font-size:13px;font-weight:500}
+html[data-newui] .nav-item.active b{font-weight:600}
+html[data-newui] .nav-icon,html[data-newui] .active .nav-icon{width:20px;height:20px;font-size:18px;background:transparent;border:0;border-radius:0;color:inherit}
+html[data-newui] .sidebar-foot{margin:0 20px 20px;padding:15px 2px 0;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent}
+html[data-newui] .sidebar-foot small{font-size:11px;line-height:1.8;color:var(--muted)}
+
+/* A clear page title above a single row of filters. */
+html[data-newui] .topbar{min-height:126px;padding:22px 28px 16px;display:flex;flex-wrap:wrap;gap:16px 12px;background:var(--surface);backdrop-filter:none;border-bottom:1px solid var(--line);box-shadow:none}
+html[data-newui] .topbar-left{flex:1 1 auto;min-width:130px;gap:12px}
+html[data-newui] .route-label small{font-size:11px;line-height:1.5;color:var(--muted);margin-bottom:4px}
+html[data-newui] .route-label h1{font-size:22px;line-height:1.35;font-weight:600;letter-spacing:0;color:var(--ink)}
+html[data-newui] .topbar-right{margin-left:0;gap:13px}
+html[data-newui] .scope-controls{order:3;flex:1 0 100%;width:100%;display:flex;justify-content:flex-start;gap:10px;flex-wrap:wrap;padding:0;overflow:visible}
+html[data-newui] .period-switch{height:34px;background:var(--surface-2);border:1px solid var(--line);padding:3px;border-radius:7px}
+html[data-newui] .period-switch button{font-size:12px;font-weight:500;padding:0 13px;border-radius:4px}
+html[data-newui] .period-switch button.active{background:var(--blue-soft);color:var(--blue);box-shadow:none;font-weight:600}
+html[data-newui] .scope-button,html[data-newui] .date-button{height:34px;border-radius:7px;background:var(--surface);border-color:var(--line)}
+html[data-newui] .scope-button{min-width:180px;padding:3px 11px}
+html[data-newui] .scope-button span{font-size:12px;font-weight:500;line-height:1.3}
+html[data-newui] .scope-button small,html[data-newui] .date-button small{font-size:10px;line-height:1.2}
+html[data-newui] .date-button{min-width:124px;padding:2px 12px}
+html[data-newui] .date-button span{font-size:10px;line-height:1.1}
+html[data-newui] .scope-button:hover,html[data-newui] .date-button:hover{border-color:var(--blue);box-shadow:none}
+html[data-newui] .sync-state,html[data-newui] .exchange-rate-state,html[data-newui] .exchange-rate-refresh{font-size:11px}
+html[data-newui] .primary-button{background:var(--blue);border-color:var(--blue);border-radius:7px;box-shadow:none;color:var(--surface);font-size:12px;font-weight:500}
+html[data-newui] .primary-button:hover{background:color-mix(in srgb,var(--blue) 82%,#12365b);border-color:color-mix(in srgb,var(--blue) 82%,#12365b);transform:none;box-shadow:none}
+html[data-newui] .topbar-export{height:34px;padding:0 16px}
+html[data-newui] .icon-button{width:32px;height:32px;border-radius:7px;border-color:var(--line);color:var(--ink-2)}
+html[data-newui] .avatar{height:32px;width:32px;border-radius:50%;background:var(--blue-soft);color:var(--blue);font:600 11px var(--data)}
+html[data-newui] main{padding:24px 28px 36px;max-width:none}
+html[data-newui] .panel{border:1px solid var(--line);border-radius:10px;background:var(--surface);box-shadow:var(--shadow-sm)}
+html[data-newui] .panel-head{padding:20px 22px 16px;gap:14px;border-bottom:1px solid var(--line-2)}
+html[data-newui] .panel-head h2{font-size:15px;line-height:1.5;font-weight:600;color:var(--ink)}
+html[data-newui] .panel-head p,html[data-newui] .panel-head small{font-size:12px;line-height:1.6;color:var(--muted)}
+html[data-newui] .panel-body{padding:20px 22px}
+html[data-newui] .panel-body.compact{padding:14px 22px 20px}
+html[data-newui] .section-grid{gap:18px;margin-bottom:18px;align-items:start}
+html[data-newui] .section-grid>.panel{height:100%}
+
+/* Existing business indicators, with a readable number hierarchy. */
+html[data-newui] .metric-grid{gap:14px;margin-bottom:20px}
+html[data-newui] .metric-grid .metric-card{min-height:137px;padding:19px 20px;border-radius:10px;border:1px solid var(--line);box-shadow:var(--shadow-sm)}
+html[data-newui] .metric-card:before{display:block;top:17px;bottom:17px;background:var(--accent,var(--blue))}
+html[data-newui] .metric-card:hover{transform:none;border-color:color-mix(in srgb,var(--blue) 45%,var(--line));box-shadow:var(--shadow)}
+html[data-newui] .metric-card .label{font-size:13px;font-weight:500;color:var(--ink-2);gap:8px;flex-wrap:wrap}
+html[data-newui] .metric-card .label em{font-size:11px;font-weight:500;padding:1px 5px;background:var(--green-soft)}
+html[data-newui] .metric-card .label em.bad{background:var(--red-soft)}
+html[data-newui] .metric-grid .metric-card .value{font-size:28px;font-weight:600;line-height:1.3;letter-spacing:-.7px;margin:12px 0 7px;color:var(--blue);overflow-wrap:anywhere}
+html[data-newui] .metric-card .value small{font-size:12px;letter-spacing:0;font-weight:400;color:var(--muted)}
+html[data-newui] .metric-card .context{font-size:11px;line-height:1.7;color:var(--muted)}
+html[data-newui] .metric-card .context b{color:var(--ink-2);font-weight:500}
+html[data-newui] .metric-help{border-color:var(--line);color:var(--muted);font-size:10px}
+html[data-newui] .drill-hint{font-size:11px;bottom:7px;right:14px;font-weight:500}
+html[data-newui] .data-quality-strip{padding:4px 0 12px;margin:0;background:transparent;border:0;border-radius:0;font-size:11px;gap:8px 16px}
+html[data-newui] .data-quality-strip summary{font-size:11px}
+html[data-newui] .quality-popover{border-color:var(--line);font-size:12px;border-radius:9px}
+
+/* Keep all overview content: existing metrics, trend, attention, comparison and store mix. */
+body[data-view="overview"] #app{display:flex;flex-direction:column}
+body[data-view="overview"] #app>.data-quality-strip{order:1}
+body[data-view="overview"] #app>.metric-grid{order:2}
+body[data-view="overview"] #app>.pulse-board{order:3}
+body[data-view="overview"] #app>.section-grid{order:4}
+body[data-view="overview"] #app>.related-analysis{order:5}
+html[data-newui] .pulse-board{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(280px,1fr);grid-template-areas:"lead alerts" "chart alerts";gap:0;min-height:350px;margin-bottom:20px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow-sm);overflow:hidden}
+html[data-newui] .pulse-lead{grid-area:lead;padding:20px 24px 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:5px 18px}
+html[data-newui] .pulse-lead:after{display:none}
+html[data-newui] .eyebrow{font-size:13px;color:var(--ink);font-weight:600;letter-spacing:0}
+html[data-newui] .eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--blue)}
+html[data-newui] .pulse-value{grid-row:1/3;grid-column:2;font-size:30px;font-weight:600;line-height:1.2;letter-spacing:-.8px;color:var(--blue);margin:0}
+html[data-newui] .pulse-value small{font-size:11px;color:var(--muted);font-weight:400}
+html[data-newui] .pulse-caption{grid-column:1;font-size:11px;margin:0;line-height:1.8;color:var(--muted)}
+html[data-newui] .pulse-caption b{color:var(--green);font-weight:500}
+html[data-newui] .goal-track{grid-row:3;grid-column:1;height:4px;margin-top:8px;background:var(--line-2);max-width:260px}
+html[data-newui] .goal-track i{background:var(--blue-2)}
+html[data-newui] .goal-line{grid-row:4;grid-column:1;max-width:260px;margin:0;font-size:10px;color:var(--muted)}
+html[data-newui] .goal-line b{color:var(--blue);font-weight:500}
+html[data-newui] .pulse-chart{grid-area:chart;padding:8px 24px 20px;border:0;background:none}
+html[data-newui] .chart-head{font-size:11px;color:var(--muted)}
+html[data-newui] .chart-head strong{color:var(--ink-2);font-size:12px;font-weight:500}
+html[data-newui] .chart-legend span:before,html[data-newui] .chart-legend span:last-child:before{background:var(--blue)}
+html[data-newui] .line-chart{height:195px;margin-top:12px}
+html[data-newui] .sales-line{stroke:var(--blue);stroke-width:2.2}
+html[data-newui] .area-fill{fill:var(--blue);opacity:.13}
+html[data-newui] .grid-line{stroke:var(--line-2)}
+html[data-newui] .chart-label,html[data-newui] .axis-label{fill:var(--muted);font-size:11px}
+html[data-newui] .chart-dot,html[data-newui] .pulse-chart .chart-focus-dot{fill:var(--surface);stroke:var(--blue)}
+html[data-newui] .chart-guide-line,html[data-newui] .pulse-chart .chart-guide-line{stroke:var(--blue-2)}
+html[data-newui] .pulse-alerts{grid-area:alerts;padding:22px 24px;background:var(--surface-2);border-left:1px solid var(--line)}
+html[data-newui] .alert-title{margin-bottom:10px}
+html[data-newui] .alert-title strong{font-size:14px;font-weight:600}
+html[data-newui] .alert-title span{color:var(--blue);background:var(--blue-soft);font-size:11px;font-weight:500}
+html[data-newui] .alert-item{grid-template-columns:23px minmax(0,1fr);gap:11px;padding:14px 0;border-color:var(--line);line-height:1.65}
+html[data-newui] .alert-item>span{background:var(--blue-soft);color:var(--blue);width:23px;height:23px;border-radius:5px;font-size:10px}
+html[data-newui] .alert-item b{font-size:12px;font-weight:500;color:var(--ink-2);overflow-wrap:anywhere}
+html[data-newui] .alert-item small{font-size:11px;line-height:1.75;margin-top:4px;color:var(--muted)}
+html[data-newui] .rank-list{padding:4px 22px 8px}
+html[data-newui] .rank-row{grid-template-columns:24px minmax(80px,1fr) 75px 50px;gap:10px;padding:15px 0;min-height:66px}
+html[data-newui] .rank-row>i{background:var(--blue-soft);color:var(--blue);border-radius:5px;font-size:11px;font-weight:500}
+html[data-newui] .rank-row span{font-size:12px;font-weight:500;overflow-wrap:anywhere;line-height:1.6}
+html[data-newui] .rank-row small{font-size:11px;color:var(--muted)}
+html[data-newui] .rank-row b{font-size:12px;font-weight:500}
+html[data-newui] .bar-track{height:5px;background:var(--line-2);border-radius:3px}
+html[data-newui] .bar-track i{background:var(--blue-2);border-radius:3px}
+
+/* Airier tables without altering column definitions or data scope. */
+html[data-newui] .data-table th,html[data-newui] .data-table.sales-detail-table th{padding:12px 14px;background:var(--surface-2);color:var(--ink-2);font-size:12px;font-weight:600;letter-spacing:0}
+html[data-newui] .data-table td,html[data-newui] .data-table.sales-detail-table td{padding:14px;font-size:13px;font-weight:500;line-height:1.6;border-top-color:var(--line-2);font-variant-numeric:tabular-nums}
+html[data-newui] .data-table td:first-child{font-weight:500}
+html[data-newui] .data-table tbody tr:hover{background:var(--surface-2)}
+html[data-newui] .data-table .product-name{font-size:11px;line-height:1.6;margin-top:5px;color:var(--muted)}
+html[data-newui] .data-table .product-identity-top b{font-size:13px;font-weight:600}
+html[data-newui] .data-table .product-asin,html[data-newui] .data-table .product-country{font-size:11px}
+html[data-newui] .data-table td.product-store-cell{font-size:12px;text-align:left}
+html[data-newui] .data-table .product-open{font-size:12px;color:var(--blue)}
+html[data-newui] .delta{font-size:12px;font-weight:500;background:none;padding:2px 0}
+html[data-newui] .table-footnote,html[data-newui] .panel-footnote{font-size:11px;line-height:1.8;padding:12px 20px;color:var(--muted);border-color:var(--line-2)}
+html[data-newui] .table-pagination{padding:12px 18px;font-size:12px;gap:9px;border-color:var(--line-2)}
+html[data-newui] .table-pagination select,html[data-newui] .table-pagination [data-table-search],html[data-newui] .table-pagination>button{height:30px;border-radius:6px;font-size:12px}
+html[data-newui] .table-pagination>button{width:30px}
+html[data-newui] .sales-filter-bar.clarity-filters{padding:15px 18px;gap:9px;background:var(--surface)}
+html[data-newui] .clarity-filters input,html[data-newui] .clarity-filters select,html[data-newui] .sales-filter-bar.clarity-filters>button{height:35px;border-radius:6px;font-size:12px}
+html[data-newui] .panel-body.chart-canvas{height:280px;padding:18px 22px}
+html[data-newui] .chart-legend-light{font-size:11px}
+html[data-newui] .chart-tooltip,html[data-newui] .formula-tooltip{background:#253d53;border-color:#3d5a72;border-radius:8px;box-shadow:var(--shadow-strong)}
+html[data-newui] .chart-tooltip span{color:#c2d4e3;font-size:11px}
+html[data-newui] .chart-tooltip b{color:#b5d9f5;font-size:14px}
+html[data-newui] .note-box{padding:13px 15px;background:var(--blue-soft);border-color:var(--line);color:var(--ink-2);font-size:12px;line-height:1.8;border-radius:7px}
+html[data-newui] .note-box.warn{background:var(--amber-soft);color:var(--amber)}
+html[data-newui] .secondary-details>summary{padding:16px 20px;font-size:13px}
+html[data-newui] .secondary-details>summary>span{font-size:11px}
+html[data-newui] .attention-list{padding:5px 20px}
+html[data-newui] .attention-list>button{padding:14px 0}
+html[data-newui] .attention-list b{font-size:12px}
+html[data-newui] .attention-list small{font-size:11px;line-height:1.7}
+html[data-newui] .related-analysis.related-cards{margin:0 0 18px;padding:12px;border-color:var(--line);border-radius:10px;background:var(--surface-2);gap:14px;box-shadow:none}
+html[data-newui] .related-cards .related-label{padding:3px 8px}
+html[data-newui] .related-cards .related-links{gap:10px}
+html[data-newui] .related-cards .related-links button{border-color:var(--line);border-radius:7px;min-height:65px;padding:12px 15px}
+html[data-newui] .related-cards .related-links button>b{background:var(--blue-soft);color:var(--blue);font-size:11px}
+html[data-newui] .related-cards .related-links i{color:var(--blue)}
+html[data-newui] .related-cards .related-links button:hover{border-color:var(--blue-2);box-shadow:none;transform:none}
+html[data-newui] .related-cards .related-links button strong{font-size:13px;font-weight:600}
+html[data-newui] .related-cards .related-links button small{font-size:11px;line-height:1.7}
+html[data-newui] .drawer{border-color:var(--line);background:var(--surface)}
+html[data-newui] .drawer-head{padding:22px}
+html[data-newui] .drawer-body{padding:22px}
+html[data-newui] .popover{border-radius:10px;box-shadow:var(--shadow-strong);border-color:var(--line)}
+html[data-newui] .empty-state-block,html[data-newui] .data-state-block{color:var(--muted)}
+html[data-newui] .logistics-provider-head,html[data-newui] .logistics-provider-row{font-size:13px}
+html[data-newui] .logistics-provider-col{padding-top:13px;padding-bottom:13px}
+html[data-newui] .logistics-quality-details>summary{padding:18px 20px}
+html[data-newui] .logistics-performance-scopes{padding:13px 20px}
+html[data-newui] .logistics-source-cards{gap:12px}
+
+@media(min-width:1450px){html[data-newui] .metric-grid.five{grid-template-columns:repeat(5,minmax(0,1fr))}html[data-newui] .pulse-board{grid-template-columns:minmax(0,2fr) minmax(310px,1fr)}html[data-newui] .line-chart{height:220px}}
+@media(max-width:1200px){html[data-newui] .topbar{padding:18px 22px 14px}html[data-newui] main{padding:20px 22px 30px}html[data-newui] .metric-grid .metric-card{padding:16px 14px;min-height:132px}html[data-newui] .metric-grid .metric-card .value{font-size:24px}html[data-newui] .pulse-lead{grid-template-columns:1fr}html[data-newui] .pulse-value{grid-area:auto;font-size:28px;margin:3px 0}html[data-newui] .pulse-caption,html[data-newui] .goal-track,html[data-newui] .goal-line{grid-area:auto}html[data-newui] .pulse-board{grid-template-columns:minmax(0,1.6fr) minmax(250px,1fr)}html[data-newui] .rank-row{grid-template-columns:22px minmax(90px,1fr) 48px}html[data-newui] .rank-row .bar-track{grid-column:2;grid-row:2;margin-top:-6px}html[data-newui] .rank-row>b{grid-column:3;grid-row:1/3}}
+@media(max-width:1000px){html[data-newui] .sidebar{width:186px}html[data-newui] .workspace{margin-left:186px;width:calc(100% - 186px)}html[data-newui] .brand{padding:0 15px}html[data-newui] .main-nav{padding:20px 9px}html[data-newui] .topbar-right{gap:8px}html[data-newui] .metric-grid.five,html[data-newui] .metric-grid.six{grid-template-columns:repeat(3,minmax(0,1fr))}html[data-newui] .section-grid>.span-8,html[data-newui] .section-grid>.span-4{grid-column:span 12}html[data-newui] .pulse-board{grid-template-columns:minmax(0,1.4fr) minmax(240px,1fr)}html[data-newui] .pulse-lead,html[data-newui] .pulse-alerts{padding:18px}html[data-newui] .pulse-chart{padding:6px 18px 18px}html[data-newui] .topbar-right .sync-state{font-size:10px}}
+@media(max-width:900px){html[data-newui] .sidebar{width:208px;transform:translateX(-100%)}html[data-newui] .sidebar.open{transform:translateX(0)}html[data-newui] .workspace{margin-left:0;width:100%}html[data-newui] .menu-button{display:grid}html[data-newui] .topbar{min-height:0;padding:15px 16px;gap:12px}html[data-newui] .topbar-left{min-width:0}html[data-newui] .route-label h1{font-size:19px}html[data-newui] .topbar-right{margin-left:auto}html[data-newui] .scope-controls{gap:8px}html[data-newui] .period-switch{width:100%;justify-content:space-between}html[data-newui] .period-switch button{padding:0 10px}html[data-newui] .scope-button{flex:1;min-width:150px}html[data-newui] .topbar-export{order:2;padding:0 10px}html[data-newui] main{padding:18px 14px 28px}html[data-newui] .metric-grid,html[data-newui] .metric-grid.five,html[data-newui] .metric-grid.six,html[data-newui] .metric-grid.traffic-metrics,html[data-newui] .metric-grid.traffic-metrics-4,html[data-newui] .metric-grid.traffic-metrics-5{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}html[data-newui] .metric-grid .metric-card{padding:15px;min-height:125px}html[data-newui] .metric-grid .metric-card .value{font-size:23px}html[data-newui] .pulse-board{grid-template-columns:1fr;grid-template-areas:"lead" "chart" "alerts"}html[data-newui] .pulse-alerts{border-left:0;border-top:1px solid var(--line)}html[data-newui] .line-chart{height:200px}html[data-newui] .section-grid{gap:14px}html[data-newui] .panel-head{padding:17px 18px}html[data-newui] .data-table{min-width:650px}html[data-newui] .data-table.sales-detail-table{min-width:830px}html[data-newui] .data-table td,html[data-newui] .data-table.sales-detail-table td{padding:12px;font-size:12px}html[data-newui] .related-analysis.related-cards{grid-template-columns:1fr}html[data-newui] .related-cards .related-label{flex-direction:row;justify-content:flex-start;gap:12px}html[data-newui] .related-cards .related-links{grid-template-columns:1fr}html[data-newui] .table-pagination{flex-wrap:wrap}html[data-newui] .topbar-right .exchange-rate-state{font-size:10px}html[data-newui] .topbar-right .avatar{display:none}}
+@media(prefers-reduced-motion:reduce){html *,html *:before,html *:after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+
+html[data-newui] linearGradient[id^="surfaceArea-"] stop,html[data-newui] #salesArea stop{stop-color:var(--blue)}
+html[data-newui] .series-teal{stroke:var(--teal)}
+html[data-newui] .metric-card .value{white-space:nowrap;overflow-wrap:normal}
+html[data-newui] .metric-card .amount-currency{font-size:10px;font-weight:400;letter-spacing:0;margin-left:2px}
+html[data-newui] .metric-card .metric-value-row{position:static;max-width:100%;gap:0}
+html[data-newui] .metric-card .metric-help{position:absolute!important;top:18px;right:12px}
+html[data-newui] .metric-card .label{padding-right:12px}
+@media(min-width:1101px) and (max-width:1350px){html[data-newui] .metric-grid .metric-card .value{font-size:25px}html[data-newui] .metric-grid .metric-card{padding:17px 15px}}
+/* Comparison columns stay visible; long cross-border store names get the full label track. */
+html[data-newui] body[data-view="overview"] .data-table{min-width:0;table-layout:fixed}
+html[data-newui] body[data-view="overview"] .data-table th:first-child{width:29%}
+html[data-newui] body[data-view="overview"] .data-table th,html[data-newui] body[data-view="overview"] .data-table td{padding:14px 12px;white-space:normal;overflow-wrap:anywhere}
+html[data-newui] .rank-row{grid-template-columns:24px minmax(0,1fr) 50px;grid-template-rows:auto auto;row-gap:5px;min-height:71px;padding:13px 0}
+html[data-newui] .rank-row>i{grid-column:1;grid-row:1/3}
+html[data-newui] .rank-row>span{grid-column:2;grid-row:1}
+html[data-newui] .rank-row>.bar-track{grid-column:2;grid-row:2;width:100%;margin:0}
+html[data-newui] .rank-row>b{grid-column:3;grid-row:1/3}
+html[data-newui] .rank-row span small{display:block;font-weight:400}
+html[data-newui] body[data-view="overview"] .section-grid>.panel{height:auto}
+html[data-newui] .pulse-alerts{display:block}
+html[data-newui] .alert-title{grid-column:auto}
+html[data-newui] .alert-item{border:0;border-top:1px solid var(--line);border-radius:0}
+html[data-newui] body[data-view="cashflow"] .scope-controls{display:none}
+@media(max-width:480px){html[data-newui] .metric-grid,html[data-newui] .metric-grid.five,html[data-newui] .metric-grid.six,html[data-newui] .metric-grid.four,html[data-newui] .metric-grid.traffic-metrics,html[data-newui] .metric-grid.traffic-metrics-4,html[data-newui] .metric-grid.traffic-metrics-5{grid-template-columns:1fr}html[data-newui] .metric-grid .metric-card{min-height:115px}html[data-newui] .metric-card .value{white-space:normal}html[data-newui] .scope-button{min-width:130px}html[data-newui] .date-button{min-width:110px}}
+
+/* Shared compact presentation across business pages. Keep all content and actions. */
+html[data-newui] .topbar{min-height:108px;padding:16px 24px 12px;gap:12px}
+html[data-newui] main{padding:18px 24px 28px}
+html[data-newui] .route-label h1{font-size:21px}
+html[data-newui] .metric-grid{gap:10px;margin-bottom:14px}
+html[data-newui] .metric-grid .metric-card{min-height:104px;padding:12px 14px 22px;border-radius:9px;background:color-mix(in srgb,var(--blue-soft) 38%,var(--surface));box-shadow:var(--shadow-sm)}
+html[data-newui] .metric-card:before{top:12px;bottom:12px}
+html[data-newui] .metric-card .label{font-size:12px;line-height:1.5;color:var(--ink-2)}
+html[data-newui] .metric-grid .metric-card .value{font-size:24px;line-height:1.2;margin:7px 0 4px;letter-spacing:-.5px;overflow-wrap:normal}
+html[data-newui] .metric-card .context{font-size:11px;line-height:1.5}
+html[data-newui] .metric-card .metric-help{top:12px;right:10px}
+html[data-newui] .metric-card .drill-hint{bottom:5px;right:12px}
+html[data-newui] .section-grid{gap:14px;margin-bottom:14px}
+html[data-newui] .panel{border-radius:9px}
+html[data-newui] .panel-head{padding:12px 16px;gap:12px;background:var(--surface-2);border-bottom-color:var(--line);border-radius:8px 8px 0 0}
+html[data-newui] .panel-head h2{font-size:14px}
+html[data-newui] .panel-head p,html[data-newui] .panel-head small{font-size:12px;line-height:1.5}
+html[data-newui] .panel-body{padding:14px 16px}
+html[data-newui] .panel-body.compact{padding:10px 16px 14px}
+html[data-newui] .panel-body.flush{padding:0}
+html[data-newui] .panel-body.chart-canvas{height:230px;min-height:0;padding:12px 16px}
+html[data-newui] .data-table th,html[data-newui] .data-table.sales-detail-table th{padding:10px 12px}
+html[data-newui] .data-table td,html[data-newui] .data-table.sales-detail-table td{padding:10px 12px;font-size:13px;line-height:1.5}
+html[data-newui] body[data-view="overview"] .data-table th,html[data-newui] body[data-view="overview"] .data-table td{padding:10px 12px}
+html[data-newui] .table-footnote,html[data-newui] .panel-footnote{padding:9px 16px}
+html[data-newui] .table-pagination{padding:9px 14px}
+html[data-newui] .sales-filter-bar.clarity-filters{padding:12px 14px;gap:8px}
+html[data-newui] .clarity-filters input,html[data-newui] .clarity-filters select,html[data-newui] .sales-filter-bar.clarity-filters>button{height:33px}
+html[data-newui] .related-analysis.related-cards{padding:9px;margin-bottom:14px;gap:10px;background:var(--surface-2)}
+html[data-newui] .related-cards .related-links button{min-height:54px;padding:8px 12px}
+html[data-newui] .related-cards .related-links button small{line-height:1.5}
+html[data-newui] .pulse-board{min-height:300px;margin-bottom:14px}
+html[data-newui] .pulse-lead{padding:16px 18px 8px}
+html[data-newui] .pulse-value{font-size:27px}
+html[data-newui] .pulse-chart{padding:6px 18px 14px}
+html[data-newui] .line-chart{height:178px;margin-top:10px}
+html[data-newui] .pulse-alerts{padding:16px 18px}
+html[data-newui] .alert-item{padding:11px 0}
+html[data-newui] .rank-list{padding:0 16px 6px}
+html[data-newui] .rank-row{min-height:60px;padding:9px 0;row-gap:3px}
+html[data-newui] .note-box{padding:10px 12px;line-height:1.6}
+html[data-newui] .secondary-details>summary{padding:12px 16px;font-size:13px;background:var(--surface-2)}
+html[data-newui] .attention-list{padding:2px 16px}
+html[data-newui] .attention-list>button{padding:10px 0}
+
+/* Sales, traffic and ads reuse the same framing and compact summaries. */
+html[data-newui] .profit-flow{min-height:94px;grid-template-columns:repeat(5,minmax(0,1fr))}
+html[data-newui] .profit-flow button{padding:13px 16px;gap:4px;background:var(--surface-2);border-color:var(--line)}
+html[data-newui] .profit-flow button:hover{background:var(--blue-soft)}
+html[data-newui] .profit-flow span{font-size:12px;font-weight:500;color:var(--ink-2)}
+html[data-newui] .profit-flow b{font-size:18px;color:var(--blue);overflow-wrap:anywhere}
+html[data-newui] .profit-flow small{font-size:11px}
+html[data-newui] .profit-flow .profit{background:var(--green-soft)}
+html[data-newui] .profit-flow .profit b,html[data-newui] .profit-flow .profit span{color:var(--green)}
+html[data-newui] body[data-view="ads"] .span-4 .data-table{min-width:0;table-layout:fixed}
+html[data-newui] body[data-view="ads"] .span-4 .data-table th:first-child{width:26%}
+html[data-newui] body[data-view="ads"] .span-4 .data-table th,html[data-newui] body[data-view="ads"] .span-4 .data-table td{padding:10px 8px;font-size:12px;white-space:normal;overflow-wrap:anywhere}
+html[data-newui] .chart-summary{padding:12px 16px;gap:12px;background:var(--surface-2);border-color:var(--line)}
+html[data-newui] .chart-summary>div{padding:8px 12px;border:1px solid var(--line);border-radius:7px;background:var(--surface)}
+html[data-newui] .chart-summary span{font-size:12px;color:var(--ink-2)}
+html[data-newui] .chart-summary b{font-size:17px;color:var(--blue)}
+html[data-newui] .traffic-charts{gap:14px;margin-bottom:14px}
+html[data-newui] .traffic-chart .panel-body.chart-canvas{height:190px;padding:8px 12px}
+html[data-newui] .traffic-all-details>summary{color:var(--blue);padding:12px 16px;background:var(--surface-2)}
+
+/* Logistics status, provider/channel list and inventory seasonality. */
+html[data-newui] .logistics-transport-note,html[data-newui] .logistics-job-note{padding:10px 12px;border-color:var(--line);background:var(--blue-soft);color:var(--ink-2);font-size:12px}
+html[data-newui] .logistics-transport-note>b,html[data-newui] .logistics-job-note>b{color:var(--blue)}
+html[data-newui] .logistics-transport-note>small,html[data-newui] .logistics-job-note>small{font-size:11px}
+html[data-newui] .logistics-transport-note.pending,html[data-newui] .logistics-job-note.warn{background:var(--amber-soft);border-color:color-mix(in srgb,var(--amber) 25%,var(--line))}
+html[data-newui] .logistics-transport-note.pending>b,html[data-newui] .logistics-job-note.warn>b{color:var(--amber)}
+html[data-newui] .logistics-job-note progress{accent-color:var(--blue)}
+html[data-newui] .logistics-provider-toolbar{padding:10px 16px}
+html[data-newui] .logistics-provider-grid{padding:10px 16px;gap:10px}
+html[data-newui] .logistics-provider-col{padding-top:0;padding-bottom:0}
+html[data-newui] .logistics-provider-head{font-size:12px;color:var(--ink-2);background:var(--surface-2)}
+html[data-newui] .logistics-provider-name b{font-size:13px;font-weight:600}
+html[data-newui] .logistics-provider-name small{margin-top:3px}
+html[data-newui] .logistics-transit-days{color:var(--teal)}
+html[data-newui] .logistics-sample-note.few{color:var(--amber)}
+html[data-newui] .logistics-performance-scopes{padding:10px 16px;background:var(--surface-2)}
+html[data-newui] .logistics-quality-details>summary{padding:12px 16px;background:var(--surface-2);border-radius:8px}
+html[data-newui] .logistics-source-cards{gap:10px}
+html[data-newui] .logistics-source-row{padding:10px 12px;border-color:var(--line);background:var(--surface)}
+html[data-newui] .logistics-source-row.failed{border-color:color-mix(in srgb,var(--red) 30%,var(--line))}
+html[data-newui] .logistics-channel-caption{padding:10px 16px}
+html[data-newui] .logistics-channel-caption span{font-size:12px}
+html[data-newui] .logistics-sync-status>div{border-color:var(--line);background:var(--surface-2);padding:10px 12px}
+html[data-newui] .logistics-sync-status span{font-size:12px}
+html[data-newui] .inventory-seasonality>summary{padding:12px 16px;background:var(--surface-2);border-radius:8px}
+html[data-newui] .inventory-seasonality>summary i{color:var(--blue)}
+html[data-newui] .inventory-seasonality>summary:focus-visible{outline-color:var(--blue)}
+html[data-newui] .inventory-season-status strong{color:var(--blue)}
+html[data-newui] .inventory-season-status.warning{background:var(--amber-soft);color:var(--amber)}
+html[data-newui] .inventory-season-status.warning strong{color:var(--amber)}
+html[data-newui] .inventory-season-status .urgent,html[data-newui] .inventory-season-hint.error{color:var(--red)}
+html[data-newui] .inventory-season-controls input,html[data-newui] .inventory-season-controls select{font-size:12px;height:34px}
+html[data-newui] .inventory-season-controls .primary-button{background:var(--blue);border-color:var(--blue);font-size:12px}
+html[data-newui] .inventory-season-controls .primary-button:hover:not(:disabled){background:color-mix(in srgb,var(--blue) 82%,#12365b)}
+html[data-newui] .season-month.active,html[data-newui] .season-insufficient.active{color:var(--blue);border-color:var(--line);background:var(--blue-soft);box-shadow:inset 0 0 0 1px var(--line)}
+html[data-newui] .season-month.active b,html[data-newui] .season-month.active em{color:var(--blue);background:transparent}
+html[data-newui] .season-toolbar .primary-button{background:var(--blue);border-color:var(--blue)}
+html[data-newui] .inventory-warning{border-color:color-mix(in srgb,var(--amber) 25%,var(--line));background:var(--amber-soft);color:var(--amber);padding:12px 16px;font-size:12px}
+html[data-newui] .drill-head{padding:16px 18px;background:var(--surface-2)}
+html[data-newui] .drill-body{padding:16px 18px 24px;gap:16px}
+
+@media(min-width:1101px) and (max-width:1350px){html[data-newui] .metric-grid.six .metric-card .value{font-size:21px}}
+@media(max-width:1180px){html[data-newui] .profit-flow{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:900px){html[data-newui] .topbar{min-height:0;padding:13px 16px;gap:10px}html[data-newui] main{padding:14px 14px 24px}html[data-newui] .metric-grid .metric-card{min-height:100px;padding:12px 13px 22px}html[data-newui] .metric-grid .metric-card .value{font-size:23px}html[data-newui] .pulse-board{min-height:0}html[data-newui] .panel-body.chart-canvas{height:210px}}
+@media(max-width:480px){html[data-newui] .metric-grid .metric-card{min-height:96px}html[data-newui] .line-chart{height:170px}html[data-newui] .pulse-lead,html[data-newui] .pulse-alerts{padding:14px}html[data-newui] .pulse-chart{padding:6px 14px 12px}}
+
+
+/* Refined typography: consistent typefaces, aligned numbers and quiet white surfaces. */
+html[data-newui] body{font-family:var(--font);font-weight:400;line-height:1.6;-webkit-font-smoothing:antialiased}
+html[data-newui] .brand strong{font-size:17px;font-weight:600;letter-spacing:0}
+html[data-newui] .brand small{font-size:11px;line-height:1.5}
+html[data-newui] .nav-group>span{font-size:11px;font-weight:400;letter-spacing:0}
+html[data-newui] .nav-item b{font-size:14px;font-weight:500}
+html[data-newui] .nav-item.active b{font-weight:600}
+html[data-newui] .route-label h1{font-size:24px;line-height:1.35;font-weight:600;letter-spacing:0}
+html[data-newui] .route-label small{font-size:12px;font-weight:400;margin-bottom:3px}
+html[data-newui] .period-switch button{font-weight:400}
+html[data-newui] .period-switch button.active{font-weight:500}
+html[data-newui] .primary-button{font-weight:500}
+html[data-newui] .panel-head{background:var(--surface);border-bottom-color:var(--line-2);padding:12px 16px}
+html[data-newui] .panel-head h2{font-size:15px;line-height:1.5;font-weight:600;letter-spacing:0}
+html[data-newui] .panel-head p,html[data-newui] .panel-head small{font-size:12px;font-weight:400;line-height:1.6}
+html[data-newui] .metric-grid .metric-card{background:var(--surface);min-height:104px;padding:12px 14px 20px}
+html[data-newui] .metric-card:before{top:14px;bottom:auto;width:2px;height:20px;border-radius:0 2px 2px 0}
+html[data-newui] .metric-card .label{font-size:12px;font-weight:500;line-height:1.5}
+html[data-newui] .metric-grid .metric-card .value{font-family:var(--data);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.25;letter-spacing:-.025em;margin:7px 0 5px;color:var(--metric-ink)}
+html[data-newui] .metric-card .value small{font-family:var(--data);font-size:11px;font-weight:400;letter-spacing:0;margin-left:3px;vertical-align:baseline}
+html[data-newui] .metric-card .context{font-size:12px;font-weight:400;line-height:1.6}
+html[data-newui] .metric-card .context b{font-weight:500}
+html[data-newui] .metric-card .metric-help{top:12px;right:10px}
+html[data-newui] .pulse-value{font-family:var(--data);font-size:28px;font-weight:600;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
+html[data-newui] .pulse-caption{font-size:12px;line-height:1.65}
+html[data-newui] .pulse-alerts{background:var(--surface-2);border-color:var(--line-2)}
+html[data-newui] .alert-title strong{font-size:14px;font-weight:600}
+html[data-newui] .alert-item b{font-size:13px;font-weight:500;line-height:1.65}
+html[data-newui] .alert-item small{font-size:12px;font-weight:400;line-height:1.65}
+html[data-newui] .alert-item{border-color:var(--line-2)}
+html[data-newui] .eyebrow{font-size:14px;font-weight:600}
+html[data-newui] .chart-head,html[data-newui] .chart-legend-light{font-size:12px}
+html[data-newui] .data-table th,html[data-newui] .data-table.sales-detail-table th{font-family:var(--font);font-size:12px;font-weight:500;padding:10px 14px}
+html[data-newui] .data-table td,html[data-newui] .data-table.sales-detail-table td{font-family:var(--data);font-size:13px;font-weight:400;line-height:1.6;padding:10px 14px}
+html[data-newui] .data-table td:first-child{font-weight:500}
+html[data-newui] .data-table td b,html[data-newui] .data-table td strong{font-weight:500}
+html[data-newui] .data-table .product-identity-top b{font-weight:500}
+html[data-newui] .data-table .product-name{font-size:12px;font-weight:400;line-height:1.65;margin-top:4px}
+html[data-newui] .data-table .product-asin,html[data-newui] .data-table .product-country{font-size:12px;font-weight:400}
+html[data-newui] .table-footnote,html[data-newui] .panel-footnote{font-size:12px;line-height:1.65;font-weight:400}
+html[data-newui] .status-pill{font-size:11px;font-weight:500}
+html[data-newui] .rank-row{row-gap:5px}
+html[data-newui] .rank-row span{font-size:13px;font-weight:400}
+html[data-newui] .rank-row small{font-size:12px;line-height:1.5}
+html[data-newui] .rank-row b{font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
+html[data-newui] .rank-row>i{background:var(--surface-2);color:var(--muted)}
+html[data-newui] .secondary-details>summary{background:var(--surface);font-weight:500}
+html[data-newui] .attention-list b{font-size:13px;font-weight:500}
+html[data-newui] .attention-list small{font-size:12px;font-weight:400}
+html[data-newui] .related-analysis.related-cards{background:var(--surface);border-color:var(--line)}
+html[data-newui] .related-cards .related-links button{background:var(--surface);min-height:54px}
+html[data-newui] .related-cards .related-links button strong{font-size:13px;font-weight:500}
+html[data-newui] .related-cards .related-links button small{font-size:12px;font-weight:400}
+html[data-newui] .profit-flow button{background:var(--surface);padding:12px 14px;gap:6px}
+html[data-newui] .profit-flow span{font-size:12px;font-weight:500}
+html[data-newui] .profit-flow b{font-size:17px;font-weight:600;line-height:1.4;letter-spacing:-.02em;color:var(--metric-ink);font-variant-numeric:tabular-nums;white-space:normal;overflow-wrap:break-word}
+html[data-newui] .profit-flow small{font-size:12px;font-weight:400}
+html[data-newui] .profit-flow .profit{background:color-mix(in srgb,var(--green-soft) 50%,var(--surface))}
+html[data-newui] .profit-flow .profit b,html[data-newui] .profit-flow .profit span{color:var(--green)}
+html[data-newui] .chart-summary{background:var(--surface);padding:0;gap:0;border-top-color:var(--line-2)}
+html[data-newui] .chart-summary>div{padding:12px 16px;border:0;border-right:1px solid var(--line-2);border-radius:0;background:var(--surface)}
+html[data-newui] .chart-summary>div:last-child{border-right:0}
+html[data-newui] .chart-summary b{font-size:16px;font-weight:600;color:var(--metric-ink);font-variant-numeric:tabular-nums}
+html[data-newui] .logistics-provider-name b{font-weight:500}
+html[data-newui] .logistics-provider-row{font-weight:400;font-variant-numeric:tabular-nums}
+html[data-newui] .logistics-provider-row .logistics-transit-days{font-weight:600}
+html[data-newui] .logistics-quality-details>summary,html[data-newui] .inventory-seasonality>summary{background:var(--surface);font-weight:500}
+html[data-newui] .logistics-sync-status b{font-weight:500}
+@media(min-width:1101px) and (max-width:1350px){html[data-newui] .metric-grid.six .metric-card .value{font-size:21px}html[data-newui] .profit-flow b{font-size:15px}}
+@media(max-width:900px){html[data-newui] .route-label h1{font-size:21px}html[data-newui] .metric-grid .metric-card{min-height:100px;padding:12px 13px 20px}html[data-newui] .metric-grid .metric-card .value{font-size:23px}}
+@media(max-width:600px){html[data-newui] .profit-flow{grid-template-columns:repeat(2,minmax(0,1fr))}html[data-newui] .profit-flow b{font-size:15px;white-space:normal}html[data-newui] .chart-summary>div{padding:10px}html[data-newui] .chart-summary b{font-size:14px}}
+/* Seven sales indicators retain their order and fill both desktop rows. */
+html[data-newui] body:is([data-view="sales"],[data-view="ads"]) .data-table.sales-detail-table{min-width:1180px;table-layout:auto}
+html[data-newui] body:is([data-view="sales"],[data-view="ads"]) .sales-detail-table th,
+html[data-newui] body:is([data-view="sales"],[data-view="ads"]) .sales-detail-table td{width:auto}
+html[data-newui] body:is([data-view="sales"],[data-view="ads"]) .sales-detail-table th:first-child,
+html[data-newui] body:is([data-view="sales"],[data-view="ads"]) .sales-detail-table td:first-child{min-width:230px}
+html[data-newui] body:is([data-view="sales"],[data-view="ads"]) .sales-detail-table th:nth-child(2),
+html[data-newui] body:is([data-view="sales"],[data-view="ads"]) .sales-detail-table td:nth-child(2){min-width:165px}
+html[data-newui] body:is([data-view="sales"],[data-view="ads"]) .sales-detail-table th:nth-child(n+3),
+html[data-newui] body:is([data-view="sales"],[data-view="ads"]) .sales-detail-table td:nth-child(n+3),
+html[data-newui] body:is([data-view="sales"],[data-view="ads"]) .sales-detail-table [data-sort-column]>span{white-space:nowrap;overflow-wrap:normal}
+@media(min-width:901px){
+  html[data-newui] .metric-grid.four:has(>.metric-card:nth-child(7):last-child){grid-template-columns:repeat(12,minmax(0,1fr))}
+  html[data-newui] .metric-grid.four:has(>.metric-card:nth-child(7):last-child)>.metric-card{grid-column:span 3}
+  html[data-newui] .metric-grid.four:has(>.metric-card:nth-child(7):last-child)>.metric-card:nth-child(n+5){grid-column:span 4}
+}

@@ -1,0 +1,31 @@
+{
+  "purpose": "Locally hosted typography for the analytics NewUI; unmodified font binary files and complete upstream normal-face unicode ranges.",
+  "css_family_alias_note": "NewUI Sans and NewUI Numbers are CSS family aliases only. Original font binaries and internal names are unchanged.",
+  "font_display": "swap",
+  "font_weight_range": "100 900",
+  "network": "All font URLs are local relative assets; unicode-range limits loading to glyph segments used by the page.",
+  "sources": [
+    {
+      "package": "@fontsource-variable/inter",
+      "version": "5.3.0",
+      "css_alias": "NewUI Numbers",
+      "upstream_family": "Inter Variable",
+      "source": "ruoyi-ui/node_modules/@fontsource-variable/inter/index.css",
+      "license": "inter-LICENSE.txt",
+      "license_id": "OFL-1.1",
+      "normal_woff2_files": 7,
+      "normal_woff2_bytes": 218512
+    },
+    {
+      "package": "@fontsource-variable/noto-sans-sc",
+      "version": "5.3.0",
+      "css_alias": "NewUI Sans",
+      "upstream_family": "Noto Sans SC Variable",
+      "source": "ruoyi-ui/node_modules/@fontsource-variable/noto-sans-sc/index.css",
+      "license": "noto-sans-sc-LICENSE.txt",
+      "license_id": "OFL-1.1",
+      "normal_woff2_files": 101,
+      "normal_woff2_bytes": 4516508
+    }
+  ]
+}

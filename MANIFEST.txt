@@ -1,0 +1,12 @@
+库存中心独立版交付清单
+
+package.json              Node 启动配置
+server/index.js           静态服务与 SQLite 健康检查
+public/                   现有工作台静态资源（含库存中心页面）
+docs/SCOPE.md             本期迁移范围
+docs/API_CATALOG.md       前端接口审计清单
+docs/DEPLOYMENT.md        Linux 部署说明
+docs/ACCEPTANCE.md        已完成与未完成验证记录
+README.md                 使用与限制说明
+
+不包含：data/、node_modules/、日志、令牌、密码、生产业务数据。
