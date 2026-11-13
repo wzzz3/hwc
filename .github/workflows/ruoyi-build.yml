@@ -32,32 +32,66 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check complete Maven source snapshot
+      - name: Check and prepare complete Maven source snapshot
         id: source
         shell: bash
         run: |
           if [[ -f ruoyi-source/pom.xml && -f ruoyi-source/ruoyi-admin/pom.xml ]]; then
             echo "source_dir=ruoyi-source" >> "$GITHUB_OUTPUT"
-          elif [[ -f ruoyi-source/ruoyi-source.zip ]]; then
-            mkdir -p "$RUNNER_TEMP/ruoyi-source"
-            unzip -q ruoyi-source/ruoyi-source.zip -d "$RUNNER_TEMP/ruoyi-source"
-            roots=()
-            while IFS= read -r -d '' file; do
-              roots+=("${file%/pom.xml}")
-            done < <(find "$RUNNER_TEMP/ruoyi-source" -mindepth 1 -maxdepth 4 -type f -name pom.xml -print0)
-            valid=()
-            for root in "${roots[@]}"; do
-              if [[ -f "$root/ruoyi-admin/pom.xml" ]]; then valid+=("$root"); fi
-            done
-            if [[ ${#valid[@]} -ne 1 ]]; then
-              echo "Expected exactly one extracted Maven root containing ruoyi-admin/pom.xml; found ${#valid[@]}."
-              find "$RUNNER_TEMP/ruoyi-source" -maxdepth 4 -name pom.xml -print
+            exit 0
+          fi
+
+          archive_path=""
+          if [[ -f ruoyi-source/ruoyi-source.zip ]]; then
+            archive_path="ruoyi-source/ruoyi-source.zip"
+          elif compgen -G "ruoyi-source/ruoyi-source.zip.part[0-9][0-9][0-9]" > /dev/null; then
+            mapfile -t parts < <(find ruoyi-source -maxdepth 1 -type f -name 'ruoyi-source.zip.part[0-9][0-9][0-9]' -print | sort)
+            if [[ ${#parts[@]} -lt 1 ]]; then
+              echo "No numbered source ZIP parts were found."
               exit 1
             fi
-            echo "source_dir=${valid[0]}" >> "$GITHUB_OUTPUT"
-          else
-            echo "source_dir=" >> "$GITHUB_OUTPUT"
+            archive_path="$RUNNER_TEMP/ruoyi-source.zip"
+            cat "${parts[@]}" > "$archive_path"
           fi
+
+          if [[ -z "$archive_path" ]]; then
+            echo "source_dir=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ -f ruoyi-source/ruoyi-source.zip.sha256 ]]; then
+            expected="$(awk '{print $1}' ruoyi-source/ruoyi-source.zip.sha256 | head -n 1)"
+            actual="$(sha256sum "$archive_path" | awk '{print $1}')"
+            if [[ -z "$expected" || "$expected" != "$actual" ]]; then
+              echo "Source ZIP SHA-256 verification failed."
+              exit 1
+            fi
+          fi
+
+          extract_dir="$GITHUB_WORKSPACE/ruoyi-source/extracted"
+          rm -rf "$extract_dir"
+          mkdir -p "$extract_dir"
+          unzip -q "$archive_path" -d "$extract_dir"
+
+          roots=()
+          while IFS= read -r -d '' file; do
+            roots+=("${file%/pom.xml}")
+          done < <(find "$extract_dir" -maxdepth 5 -type f -name pom.xml -print0)
+
+          valid=()
+          for root in "${roots[@]}"; do
+            if [[ -f "$root/ruoyi-admin/pom.xml" ]]; then
+              valid+=("$root")
+            fi
+          done
+
+          if [[ ${#valid[@]} -ne 1 ]]; then
+            echo "Expected exactly one Maven root containing ruoyi-admin/pom.xml; found ${#valid[@]}."
+            find "$extract_dir" -maxdepth 5 -name pom.xml -print
+            exit 1
+          fi
+
+          echo "source_dir=${valid[0]}" >> "$GITHUB_OUTPUT"
 
       - name: Explain that build is waiting for source
         if: steps.source.outputs.source_dir == ''
@@ -66,16 +100,15 @@ jobs:
           {
             echo "## Build not started"
             echo
-            echo "The repository currently contains only the FLash backend patch, not the complete RuoYi Maven project."
+            echo "The complete RuoYi Maven source snapshot has not been uploaded."
             echo
-            echo "Upload the sanitized full source snapshot so that these files exist:"
-            echo "- `ruoyi-source/pom.xml`"
-            echo "- `ruoyi-source/ruoyi-admin/pom.xml`"
-            echo "- The modules declared by the root POM."
+            echo "Upload either:"
+            echo "- `ruoyi-source/ruoyi-source.zip`, or"
+            echo "- numbered chunks `ruoyi-source/ruoyi-source.zip.part001`, `part002`, etc."
             echo
-            echo "This workflow run only validates the CI wiring. No JAR was built or published."
+            echo "No JAR was built or published in this run."
           } >> "$GITHUB_STEP_SUMMARY"
-          echo "::notice::Waiting for the complete RuoYi Maven source under ruoyi-source/."
+          echo "::notice::Waiting for the complete RuoYi source under ruoyi-source/."
 
       - name: Set up Temurin JDK 17
         if: steps.source.outputs.source_dir != ''
@@ -84,7 +117,7 @@ jobs:
           distribution: temurin
           java-version: "17"
           cache: maven
-          cache-dependency-path: ruoyi-source/**/pom.xml
+          cache-dependency-path: "**/pom.xml"
 
       - name: Set up Maven 3.9.16
         if: steps.source.outputs.source_dir != ''
@@ -118,7 +151,7 @@ jobs:
           done
           if [[ ${#filtered[@]} -ne 1 ]]; then
             echo "Expected exactly one executable ruoyi-admin JAR, found ${#filtered[@]}."
-            printf '%s\n' "${filtered[@]}"
+            printf '%s\\n' "${filtered[@]}"
             exit 1
           fi
           mkdir -p ci-output
