@@ -1,0 +1,212 @@
+name: RuoYi 3.9.2 build
+
+on:
+  push:
+    branches:
+      - main
+      - "fix/**"
+      - "ci/**"
+    paths:
+      - "ruoyi-source/**"
+      - "ruoyi-backend/**"
+      - ".github/workflows/ruoyi-build.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "ruoyi-source/**"
+      - "ruoyi-backend/**"
+      - ".github/workflows/ruoyi-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ruoyi-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and verify RuoYi backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check and prepare complete Maven source snapshot
+        id: source
+        shell: bash
+        run: |
+          if [[ -f ruoyi-source/pom.xml && -f ruoyi-source/ruoyi-admin/pom.xml ]]; then
+            echo "source_dir=ruoyi-source" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          archive_path=""
+          if [[ -f ruoyi-source/ruoyi-source.zip ]]; then
+            archive_path="ruoyi-source/ruoyi-source.zip"
+          elif compgen -G "ruoyi-source/ruoyi-source.zip.part[0-9][0-9][0-9]" > /dev/null; then
+            mapfile -t parts < <(find ruoyi-source -maxdepth 1 -type f -name 'ruoyi-source.zip.part[0-9][0-9][0-9]' -print | sort)
+            if [[ ${#parts[@]} -lt 1 ]]; then
+              echo "No numbered source ZIP parts were found."
+              exit 1
+            fi
+            archive_path="$RUNNER_TEMP/ruoyi-source.zip"
+            cat "${parts[@]}" > "$archive_path"
+          fi
+
+          if [[ -z "$archive_path" ]]; then
+            echo "source_dir=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ -f ruoyi-source/ruoyi-source.zip.sha256 ]]; then
+            expected="$(awk '{print $1}' ruoyi-source/ruoyi-source.zip.sha256 | head -n 1)"
+            actual="$(sha256sum "$archive_path" | awk '{print $1}')"
+            if [[ -z "$expected" || "$expected" != "$actual" ]]; then
+              echo "Source ZIP SHA-256 verification failed."
+              exit 1
+            fi
+          fi
+
+          extract_dir="$GITHUB_WORKSPACE/ruoyi-source/extracted"
+          rm -rf "$extract_dir"
+          mkdir -p "$extract_dir"
+          unzip -q "$archive_path" -d "$extract_dir"
+
+          roots=()
+          while IFS= read -r -d '' file; do
+            roots+=("${file%/pom.xml}")
+          done < <(find "$extract_dir" -maxdepth 5 -type f -name pom.xml -print0)
+
+          valid=()
+          for root in "${roots[@]}"; do
+            if [[ -f "$root/ruoyi-admin/pom.xml" ]]; then
+              valid+=("$root")
+            fi
+          done
+
+          if [[ ${#valid[@]} -ne 1 ]]; then
+            echo "Expected exactly one Maven root containing ruoyi-admin/pom.xml; found ${#valid[@]}."
+            find "$extract_dir" -maxdepth 5 -name pom.xml -print
+            exit 1
+          fi
+
+          echo "source_dir=${valid[0]}" >> "$GITHUB_OUTPUT"
+
+      - name: Explain that build is waiting for source
+        if: steps.source.outputs.source_dir == ''
+        shell: bash
+        run: |
+          {
+            echo "## Build not started"
+            echo
+            echo "The complete RuoYi Maven source snapshot has not been uploaded."
+            echo
+            echo "Upload either:"
+            echo "- `ruoyi-source/ruoyi-source.zip`, or"
+            echo "- numbered chunks `ruoyi-source/ruoyi-source.zip.part001`, `part002`, etc."
+            echo
+            echo "No JAR was built or published in this run."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice::Waiting for the complete RuoYi source under ruoyi-source/."
+
+      - name: Overlay current FLash warehouse import source and tests
+        if: steps.source.outputs.source_dir != ''
+        shell: bash
+        env:
+          SOURCE_DIR: ${{ steps.source.outputs.source_dir }}
+        run: |
+          set -euo pipefail
+          main_source="ruoyi-backend/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/WarehouseImportService.java"
+          test_source="ruoyi-backend/ruoyi-system/src/test/java/com/ruoyi/system/service/impl/WarehouseImportServiceTest.java"
+          test_target="$SOURCE_DIR/ruoyi-system/src/test/java/com/ruoyi/system/service/impl/WarehouseImportServiceTest.java"
+          main_target="$SOURCE_DIR/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/WarehouseImportService.java"
+
+          test -s "$main_source"
+          test -s "$test_source"
+          test -s "$main_target"
+
+          mkdir -p "$(dirname "$test_target")"
+          cp "$main_source" "$main_target"
+          cp "$test_source" "$test_target"
+
+          echo "## FLash source overlay" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Updated WarehouseImportService.java from the reviewed branch patch." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Added WarehouseImportServiceTest.java to the Maven test source tree." >> "$GITHUB_STEP_SUMMARY"
+          grep -q '1仓-91761仓(FLASH01)' "$main_target"
+          grep -q 'normalizeFlashWarehouseName' "$test_target"
+          echo "FLash alias source and regression test are present in the actual Maven source tree."
+
+      - name: Set up Temurin JDK 17
+        if: steps.source.outputs.source_dir != ''
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+          cache-dependency-path: "**/pom.xml"
+
+      - name: Set up Maven 3.9.16
+        if: steps.source.outputs.source_dir != ''
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: "3.9.16"
+
+      - name: Show build tool versions
+        if: steps.source.outputs.source_dir != ''
+        run: |
+          java -version
+          mvn -version
+
+      - name: Build and run Maven verification
+        if: steps.source.outputs.source_dir != ''
+        working-directory: ${{ steps.source.outputs.source_dir }}
+        run: mvn -B -ntp -pl ruoyi-admin -am clean verify
+
+      - name: Prepare JAR and SHA-256 artifact
+        if: success() && steps.source.outputs.source_dir != ''
+        shell: bash
+        run: |
+          shopt -s nullglob
+          candidates=("${{ steps.source.outputs.source_dir }}/ruoyi-admin/target/ruoyi-admin"*.jar)
+          filtered=()
+          for file in "${candidates[@]}"; do
+            case "$file" in
+              *-sources.jar|*-javadoc.jar|*original-*.jar) ;;
+              *) filtered+=("$file") ;;
+            esac
+          done
+          if [[ ${#filtered[@]} -ne 1 ]]; then
+            echo "Expected exactly one executable ruoyi-admin JAR, found ${#filtered[@]}."
+            printf '%s\\n' "${filtered[@]}"
+            exit 1
+          fi
+          mkdir -p ci-output
+          cp "${filtered[0]}" ci-output/ruoyi-admin.jar
+          sha256sum ci-output/ruoyi-admin.jar > ci-output/ruoyi-admin.jar.sha256
+          {
+            echo "Commit: ${GITHUB_SHA}"
+            echo "Workflow: ${GITHUB_WORKFLOW}"
+            echo "Run ID: ${GITHUB_RUN_ID}"
+            echo
+            echo "Java:"
+            java -version 2>&1
+            echo
+            echo "Maven:"
+            mvn -version
+            echo
+            echo "JAR:"
+            ls -lh ci-output/ruoyi-admin.jar
+            sha256sum ci-output/ruoyi-admin.jar
+          } > ci-output/build-info.txt
+
+      - name: Upload build artifact
+        if: success() && steps.source.outputs.source_dir != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruoyi-admin-${{ github.sha }}
+          path: ci-output/
+          if-no-files-found: error
+          retention-days: 14
