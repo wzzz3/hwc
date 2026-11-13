@@ -1,0 +1,133 @@
+name: RuoYi 3.9.2 build
+
+on:
+  push:
+    branches:
+      - main
+      - "fix/**"
+      - "ci/**"
+    paths:
+      - "ruoyi-source/**"
+      - ".github/workflows/ruoyi-build.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "ruoyi-source/**"
+      - ".github/workflows/ruoyi-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ruoyi-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and verify RuoYi backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check complete Maven source snapshot
+        id: source
+        shell: bash
+        run: |
+          if [[ -f ruoyi-source/pom.xml && -f ruoyi-source/ruoyi-admin/pom.xml ]]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Explain that build is waiting for source
+        if: steps.source.outputs.present != 'true'
+        shell: bash
+        run: |
+          {
+            echo "## Build not started"
+            echo
+            echo "The repository currently contains only the FLash backend patch, not the complete RuoYi Maven project."
+            echo
+            echo "Upload the sanitized full source snapshot so that these files exist:"
+            echo "- `ruoyi-source/pom.xml`"
+            echo "- `ruoyi-source/ruoyi-admin/pom.xml`"
+            echo "- The modules declared by the root POM."
+            echo
+            echo "This workflow run only validates the CI wiring. No JAR was built or published."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice::Waiting for the complete RuoYi Maven source under ruoyi-source/."
+
+      - name: Set up Temurin JDK 17
+        if: steps.source.outputs.present == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+          cache-dependency-path: ruoyi-source/**/pom.xml
+
+      - name: Set up Maven 3.9.16
+        if: steps.source.outputs.present == 'true'
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: "3.9.16"
+
+      - name: Show build tool versions
+        if: steps.source.outputs.present == 'true'
+        run: |
+          java -version
+          mvn -version
+
+      - name: Build and run Maven verification
+        if: steps.source.outputs.present == 'true'
+        working-directory: ruoyi-source
+        run: mvn -B -ntp -pl ruoyi-admin -am clean verify
+
+      - name: Prepare JAR and SHA-256 artifact
+        if: success() && steps.source.outputs.present == 'true'
+        shell: bash
+        run: |
+          shopt -s nullglob
+          candidates=(ruoyi-source/ruoyi-admin/target/ruoyi-admin*.jar)
+          filtered=()
+          for file in "${candidates[@]}"; do
+            case "$file" in
+              *-sources.jar|*-javadoc.jar|*original-*.jar) ;;
+              *) filtered+=("$file") ;;
+            esac
+          done
+          if [[ ${#filtered[@]} -ne 1 ]]; then
+            echo "Expected exactly one executable ruoyi-admin JAR, found ${#filtered[@]}."
+            printf '%s\n' "${filtered[@]}"
+            exit 1
+          fi
+          mkdir -p ci-output
+          cp "${filtered[0]}" ci-output/ruoyi-admin.jar
+          sha256sum ci-output/ruoyi-admin.jar > ci-output/ruoyi-admin.jar.sha256
+          {
+            echo "Commit: ${GITHUB_SHA}"
+            echo "Workflow: ${GITHUB_WORKFLOW}"
+            echo "Run ID: ${GITHUB_RUN_ID}"
+            echo
+            echo "Java:"
+            java -version 2>&1
+            echo
+            echo "Maven:"
+            mvn -version
+            echo
+            echo "JAR:"
+            ls -lh ci-output/ruoyi-admin.jar
+            sha256sum ci-output/ruoyi-admin.jar
+          } > ci-output/build-info.txt
+
+      - name: Upload build artifact
+        if: success() && steps.source.outputs.present == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruoyi-admin-${{ github.sha }}
+          path: ci-output/
+          if-no-files-found: error
+          retention-days: 14
