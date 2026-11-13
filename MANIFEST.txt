@@ -2,7 +2,9 @@
 
 package.json              Node 启动配置
 server/index.js           静态服务与 SQLite 健康检查
+server/flash-import.test.js Flash 三表导入回归测试
 public/                   现有工作台静态资源（含库存中心页面）
+ruoyi-backend/            当前线上若依 JAR 对应的 Flash 后端功能源码快照
 docs/SCOPE.md             本期迁移范围
 docs/API_CATALOG.md       前端接口审计清单
 docs/DEPLOYMENT.md        Linux 部署说明

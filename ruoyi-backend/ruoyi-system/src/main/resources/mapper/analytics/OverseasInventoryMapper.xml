@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.OverseasInventoryMapper">
+    <sql id="columns">id, source_key AS sourceKey,
+        period,
+        source_file AS sourceFile,
+        source_sheet AS sourceSheet,
+        source_row AS sourceRow,
+        raw_warehouse AS rawWarehouse,
+        platform,
+        platform_scope AS platformScope,
+        country,
+        market_scope AS marketScope,
+        warehouse,
+        warehouse_country AS warehouseCountry,
+        shop,
+        local_sku AS localSku,
+        platform_sku AS platformSku,
+        product_name AS productName,
+        category1,
+        category2,
+        category3,
+        owner,
+        original_owner AS originalOwner,
+        purchase_price AS purchasePrice,
+        freight_price AS freightPrice,
+        quantity,
+        cost,
+        currency,
+        quantity_basis AS quantityBasis,
+        excluded,
+        exclusion_reason AS exclusionReason,
+        mapping_status AS mappingStatus,
+        mapping_key AS mappingKey,
+        age_buckets AS ageBuckets,
+        remarks,
+        quality,
+        extra,
+        imported_at AS importedAt</sql>
+    <select id="listPeriods" resultType="string">
+        SELECT DISTINCT period FROM rpa_database.inventory_snapshot WHERE source_key = #{sourceKey} ORDER BY period
+    </select>
+    <select id="status" resultType="map">
+        SELECT COUNT(*) AS total, COALESCE(SUM(excluded = 1), 0) AS excludedCount, MAX(imported_at) AS importedAt
+        FROM rpa_database.inventory_snapshot WHERE source_key = #{sourceKey}
+    </select>
+    <select id="defaultPeriod" resultType="string">
+        SELECT period FROM rpa_database.inventory_snapshot WHERE source_key = #{sourceKey} AND excluded = 0
+        GROUP BY period
+        HAVING COUNT(quantity) &gt; 0 AND SUM(COALESCE(JSON_UNQUOTE(JSON_EXTRACT(extra, '$.quantityStatus')), '') = 'ERROR') = 0
+        ORDER BY period DESC LIMIT 1
+    </select>
+    <select id="selectRows" resultType="map">
+        SELECT <include refid="columns"/> FROM rpa_database.inventory_snapshot
+        WHERE source_key = #{query.sourceKey}
+        <if test="query.period != null">AND period = #{query.period}</if>
+        <if test="query.excluded != null">AND excluded = #{query.excluded}</if>
+        <if test="query.historyExact == true">
+            AND COALESCE(source_sheet, '') = #{query.sourceSheet}
+            AND COALESCE(raw_warehouse, '') = #{query.rawWarehouse}
+            AND COALESCE(platform, '') = #{query.platform}
+            AND COALESCE(platform_scope, '') = #{query.platformScope}
+            AND COALESCE(country, '') = #{query.country}
+            AND COALESCE(market_scope, '') = #{query.marketScope}
+            AND COALESCE(warehouse, '') = #{query.warehouse}
+            AND COALESCE(warehouse_country, '') = #{query.warehouseCountry}
+            AND COALESCE(shop, '') = #{query.shop}
+            AND COALESCE(local_sku, '') = #{query.localSku}
+            AND COALESCE(platform_sku, '') = #{query.platformSku}
+            AND COALESCE(quantity_basis, '') = #{query.quantityBasis}
+            AND COALESCE(currency, '') = #{query.currency}
+        </if>
+        ORDER BY period, source_sheet, source_row, id
+    </select>
+    <select id="selectTrendRows" resultType="map">
+        SELECT period, platform, platform_scope AS platformScope, country, market_scope AS marketScope,
+               warehouse, shop, owner, category1, currency, quantity_basis AS quantityBasis,
+               mapping_status AS mappingStatus, local_sku AS localSku, platform_sku AS platformSku,
+               product_name AS productName, quantity, cost, quality, excluded
+        FROM rpa_database.inventory_snapshot
+        WHERE source_key = #{sourceKey} AND excluded = 0
+        ORDER BY period, id
+    </select>
+    <select id="countReplacement" resultType="long">
+        SELECT COUNT(*) FROM rpa_database.inventory_snapshot WHERE source_key = #{sourceKey} AND period IN
+        <foreach collection="periods" item="period" open="(" close=")" separator=",">#{period}</foreach>
+    </select>
+    <delete id="deletePeriods">
+        DELETE FROM rpa_database.inventory_snapshot WHERE source_key = #{sourceKey} AND period IN
+        <foreach collection="periods" item="period" open="(" close=")" separator=",">#{period}</foreach>
+    </delete>
+    <insert id="insertRows">
+        INSERT INTO rpa_database.inventory_snapshot (source_key, period, source_file, source_sheet, source_row, raw_warehouse, platform, platform_scope, country, market_scope, warehouse, warehouse_country, shop, local_sku, platform_sku, product_name, category1, category2, category3, owner, original_owner, purchase_price, freight_price, quantity, cost, currency, quantity_basis, excluded, exclusion_reason, mapping_status, mapping_key, age_buckets, remarks, quality, extra, imported_at)
+        VALUES
+        <foreach collection="rows" item="row" separator=",">
+            (#{row.sourceKey}, #{row.period}, #{row.sourceFile}, #{row.sourceSheet}, #{row.sourceRow}, #{row.rawWarehouse}, #{row.platform}, #{row.platformScope}, #{row.country}, #{row.marketScope}, #{row.warehouse}, #{row.warehouseCountry}, #{row.shop}, #{row.localSku}, #{row.platformSku}, #{row.productName}, #{row.category1}, #{row.category2}, #{row.category3}, #{row.owner}, #{row.originalOwner}, #{row.purchasePrice}, #{row.freightPrice}, #{row.quantity}, #{row.cost}, #{row.currency}, #{row.quantityBasis}, #{row.excluded}, #{row.exclusionReason}, #{row.mappingStatus}, #{row.mappingKey}, #{row.ageBuckets}, #{row.remarks}, #{row.quality}, #{row.extra}, #{row.importedAt})
+        </foreach>
+    </insert>
+</mapper>

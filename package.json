@@ -1,1 +1,1 @@
-{"name":"analytics-standalone","private":true,"version":"0.1.0","type":"module","engines":{"node":">=22.13"},"scripts":{"start":"node server/index.js"}}
+{"name":"analytics-standalone","private":true,"version":"0.2.0","type":"module","engines":{"node":">=22.13"},"scripts":{"start":"node server/index.js","test":"node --test server/*.test.js"},"dependencies":{"xlsx":"0.18.5"}}
